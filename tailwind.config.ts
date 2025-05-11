@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,14 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				baby: {
+					'blue': '#A8D1F0',
+					'blue-light': '#D1E7F7',
+					'purple': '#B5A8E0',
+					'purple-light': '#DED6F2',
+					'pink': '#F0A8D1',
+					'pink-light': '#F7D1E7',
 				}
 			},
 			borderRadius: {
@@ -84,11 +93,30 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'pulse-gentle': {
+					'0%, 100%': { opacity: '1' },
+					'50%': { opacity: '0.7' }
+				},
+				'wave': {
+					'0%': { transform: 'scaleY(0.5)' },
+					'50%': { transform: 'scaleY(1.5)' },
+					'100%': { transform: 'scaleY(0.5)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-gentle': 'pulse-gentle 2s ease-in-out infinite',
+				'wave-1': 'wave 1.0s ease-in-out infinite',
+				'wave-2': 'wave 1.3s ease-in-out infinite',
+				'wave-3': 'wave 1.6s ease-in-out infinite',
+				'wave-4': 'wave 1.9s ease-in-out infinite',
+				'wave-5': 'wave 2.2s ease-in-out infinite',
+			},
+			fontFamily: {
+				'sans': ['Nunito', 'sans-serif'],
+				'display': ['Quicksand', 'sans-serif']
 			}
 		}
 	},
