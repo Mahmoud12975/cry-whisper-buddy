@@ -12,7 +12,8 @@ export const analyzeAudio = async (audioFile: File | Blob): Promise<CryAnalysisR
     // Simulate processing time
     setTimeout(() => {
       // Generate a weighted random result
-      const types: CryType[] = ['hunger', 'pain', 'sleepy', 'discomfort', 'diaper'];
+      // Using correct CryType values from cryTypes.ts
+      const types: CryType[] = ['hungry', 'belly_pain', 'tired', 'discomfort', 'cold_hot'];
       
       // Select a primary type for the demo
       const primaryIndex = Math.floor(Math.random() * types.length);
@@ -26,7 +27,14 @@ export const analyzeAudio = async (audioFile: File | Blob): Promise<CryAnalysisR
       const primaryConfidence = 0.5 + Math.random() * 0.3;
       distribution[primaryType] = primaryConfidence;
       
-      // Distribute remaining probability among other types
+      // Initialize all cry types with zero confidence
+      Object.keys(cryTypeInfo).forEach(type => {
+        if (type !== primaryType) {
+          distribution[type as CryType] = 0;
+        }
+      });
+      
+      // Distribute remaining probability among other selected types
       const remainingConfidence = 1 - primaryConfidence;
       
       types.forEach(type => {
@@ -38,11 +46,13 @@ export const analyzeAudio = async (audioFile: File | Blob): Promise<CryAnalysisR
       });
       
       // Normalize other values to sum to remainingConfidence
-      types.forEach(type => {
-        if (type !== primaryType) {
-          distribution[type] = (distribution[type] / totalOthers) * remainingConfidence;
-        }
-      });
+      if (totalOthers > 0) {
+        types.forEach(type => {
+          if (type !== primaryType) {
+            distribution[type] = (distribution[type] / totalOthers) * remainingConfidence;
+          }
+        });
+      }
       
       // Generate explanation based on the primary type
       const explanation = getExplanation(primaryType, distribution[primaryType]);
