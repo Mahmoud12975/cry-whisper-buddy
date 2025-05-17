@@ -9,45 +9,93 @@ const HOP_LENGTH = 512;
 const NUM_MFCC = 13;
 const NUM_BANDS = 40;
 
+// Define specific interfaces for each model feature type
+interface BaseModelFeature {
+  pitchRange: number[];
+  mfccProfile: number[];
+}
+
+interface HungryCryFeature extends BaseModelFeature {
+  rhythmicPattern: boolean;
+  intensityGrowth: boolean;
+}
+
+interface BellyPainCryFeature extends BaseModelFeature {
+  suddenIntensity: boolean;
+  sustainedCry: boolean;
+}
+
+interface TiredCryFeature extends BaseModelFeature {
+  lowEnergy: boolean;
+  intermittentPattern: boolean;
+}
+
+interface DiscomfortCryFeature extends BaseModelFeature {
+  variablePitch: boolean;
+  gruntingSounds: boolean;
+}
+
+interface ColdHotCryFeature extends BaseModelFeature {
+  agitatedPattern: boolean;
+  squirming: boolean;
+}
+
+interface LonelyCryFeature extends BaseModelFeature {
+  buildupPattern: boolean;
+  attentionSeeking: boolean;
+}
+
+// Define a union type of all possible feature types
+type CryModelFeature = 
+  | HungryCryFeature
+  | BellyPainCryFeature
+  | TiredCryFeature
+  | DiscomfortCryFeature
+  | ColdHotCryFeature
+  | LonelyCryFeature;
+
+// Create a record type mapping cry types to their feature model
+type CryFeatureMap = Record<CryType, CryModelFeature>;
+
 // These would be real model weights in a production system
 // For now we'll use a more sophisticated approach based on actual audio features
-const MODEL_FEATURES = {
+const MODEL_FEATURES: Partial<CryFeatureMap> = {
   hungry: { 
     pitchRange: [300, 600], 
     rhythmicPattern: true, 
     intensityGrowth: true,
     mfccProfile: [2.1, 1.8, -0.5, 0.3, -0.2, 0.1, -0.4, 0.2, -0.1, 0.3, -0.2, 0.1, -0.3]
-  },
+  } as HungryCryFeature,
   belly_pain: {
     pitchRange: [400, 800], 
     suddenIntensity: true, 
     sustainedCry: true,
     mfccProfile: [2.5, 2.1, 0.8, -0.5, -0.9, -0.3, 0.5, 0.1, -0.4, -0.2, 0.3, -0.5, 0.2]
-  },
+  } as BellyPainCryFeature,
   tired: {
     pitchRange: [250, 500], 
     lowEnergy: true, 
     intermittentPattern: true,
     mfccProfile: [1.8, 1.2, -0.3, -0.7, -0.1, 0.2, -0.2, -0.4, 0.1, -0.3, -0.1, -0.2, -0.1]
-  },
+  } as TiredCryFeature,
   discomfort: {
     pitchRange: [350, 650], 
     variablePitch: true, 
     gruntingSounds: true,
     mfccProfile: [2.0, 1.5, 0.2, -0.2, -0.5, 0.4, -0.3, 0.2, -0.4, 0.1, -0.2, 0.3, -0.1]
-  },
+  } as DiscomfortCryFeature,
   cold_hot: {
     pitchRange: [300, 550], 
     agitatedPattern: true, 
     squirming: true,
     mfccProfile: [1.9, 1.6, 0.3, -0.3, -0.4, 0.1, -0.2, 0.3, -0.3, 0.2, -0.1, 0.1, -0.2]
-  },
+  } as ColdHotCryFeature,
   lonely: {
     pitchRange: [280, 520], 
     buildupPattern: true, 
     attentionSeeking: true,
     mfccProfile: [1.7, 1.4, -0.2, -0.4, -0.3, 0.2, -0.1, -0.3, 0.2, -0.1, -0.2, 0.1, -0.1]
-  }
+  } as LonelyCryFeature
 };
 
 /**
@@ -342,18 +390,29 @@ function predictCryType(features: any): CryAnalysisResult {
     // Get model features for this cry type
     const modelFeature = MODEL_FEATURES[type as keyof typeof MODEL_FEATURES];
     
+    if (!modelFeature) continue;
+    
     // Calculate pitch match
     const pitchScore = features.pitch >= modelFeature.pitchRange[0] && 
                      features.pitch <= modelFeature.pitchRange[1] ? 1.0 : 0.5;
     
-    // Calculate rhythm match
-    const rhythmScore = modelFeature.rhythmicPattern && features.rhythmicPattern.regularity > 0.7 ? 1.0 :
-                     modelFeature.buildupPattern && features.intensity.intensityGrowth > 0 ? 1.0 : 0.5;
+    // Calculate rhythm match - check for proper type before accessing properties
+    let rhythmScore = 0.5;
+    if ('rhythmicPattern' in modelFeature && modelFeature.rhythmicPattern && features.rhythmicPattern.regularity > 0.7) {
+      rhythmScore = 1.0;
+    } else if ('buildupPattern' in modelFeature && modelFeature.buildupPattern && features.intensity.intensityGrowth > 0) {
+      rhythmScore = 1.0;
+    }
     
-    // Calculate intensity match
-    const intensityScore = modelFeature.intensityGrowth && features.intensity.intensityGrowth > 0 ? 1.0 :
-                        modelFeature.suddenIntensity && features.intensity.rms > 0.3 ? 1.0 :
-                        modelFeature.lowEnergy && features.intensity.rms < 0.2 ? 1.0 : 0.5;
+    // Calculate intensity match - check for proper type before accessing properties
+    let intensityScore = 0.5;
+    if ('intensityGrowth' in modelFeature && modelFeature.intensityGrowth && features.intensity.intensityGrowth > 0) {
+      intensityScore = 1.0;
+    } else if ('suddenIntensity' in modelFeature && modelFeature.suddenIntensity && features.intensity.rms > 0.3) {
+      intensityScore = 1.0;
+    } else if ('lowEnergy' in modelFeature && modelFeature.lowEnergy && features.intensity.rms < 0.2) {
+      intensityScore = 1.0;
+    }
     
     // Calculate MFCC profile similarity (cosine similarity)
     let mfccSim = 0;
