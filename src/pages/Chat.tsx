@@ -1,31 +1,38 @@
+
 import { useState, useRef, useEffect } from "react";
-import { Bot, Send, User, MessageCircle } from "lucide-react";
+import { Bot, Send, User, MessageCircle, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/sonner";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import NavBar from "@/components/NavBar";
-
-interface Message {
-  content: string;
-  role: "user" | "assistant";
-  timestamp: Date;
-}
+import ChatHistory from "@/components/ChatHistory";
+import { useChatStore, ChatMessage } from "@/stores/chatStore";
 
 const GEMINI_API_KEY = "AIzaSyDLVpZU80CE4XURZNcUBCbblO0d4uh0JQ4";
 
 const Chat = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      content: "Hello! I'm your mommy assistant. I can help with questions about your baby, feeding, sleep, or any concerns you might have as a new mother.",
-      role: "assistant",
-      timestamp: new Date(),
-    },
-  ]);
+  const { 
+    messages, 
+    sessions, 
+    currentSessionId, 
+    createSession, 
+    addMessage, 
+    switchSession, 
+    deleteSession 
+  } = useChatStore();
+  
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // If there's no current session, create one
+  useEffect(() => {
+    if (messages.length === 0 && !currentSessionId) {
+      createSession();
+    }
+  }, [messages.length, currentSessionId, createSession]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -38,13 +45,13 @@ const Chat = () => {
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
 
-    const userMessage: Message = {
+    const userMessage: ChatMessage = {
       content: inputMessage,
       role: "user",
       timestamp: new Date(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    addMessage(userMessage);
     setInputMessage("");
     setIsLoading(true);
 
@@ -70,12 +77,12 @@ const Chat = () => {
       const data = await response.json();
 
       if (data.candidates && data.candidates[0]?.content?.parts && data.candidates[0].content.parts[0]?.text) {
-        const assistantMessage: Message = {
+        const assistantMessage: ChatMessage = {
           content: data.candidates[0].content.parts[0].text,
           role: "assistant",
           timestamp: new Date(),
         };
-        setMessages((prev) => [...prev, assistantMessage]);
+        addMessage(assistantMessage);
       } else {
         throw new Error("Invalid response format");
       }
@@ -83,12 +90,12 @@ const Chat = () => {
       console.error("Error fetching from Gemini API:", error);
       toast.error("Sorry, I couldn't process your request. Please try again.");
 
-      const errorMessage: Message = {
+      const errorMessage: ChatMessage = {
         content: "I'm sorry, I'm having trouble connecting right now. Please try again in a moment.",
         role: "assistant",
         timestamp: new Date(),
       };
-      setMessages((prev) => [...prev, errorMessage]);
+      addMessage(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -101,8 +108,12 @@ const Chat = () => {
     }
   };
 
+  const handleNewChat = () => {
+    createSession();
+  };
+
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
   return (
@@ -122,6 +133,26 @@ const Chat = () => {
             Ask me anything about baby care, feeding, sleep, or your well-being.
           </p>
         </header>
+
+        <div className="flex justify-between items-center mb-4">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleNewChat}
+            className="flex gap-1"
+          >
+            <MessageCircle className="h-4 w-4" />
+            <span className="hidden sm:inline">New Chat</span>
+          </Button>
+          
+          <ChatHistory 
+            sessions={sessions}
+            currentSessionId={currentSessionId}
+            onSelectSession={switchSession}
+            onDeleteSession={deleteSession}
+            onNewChat={handleNewChat}
+          />
+        </div>
 
         <Card className="mb-4">
           <CardHeader className="pb-3">
