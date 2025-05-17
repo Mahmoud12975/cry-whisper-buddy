@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Bot, Send, User, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -39,7 +38,6 @@ const Chat = () => {
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
 
-    // Add user message to chat
     const userMessage: Message = {
       content: inputMessage,
       role: "user",
@@ -57,18 +55,48 @@ const Chat = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: `You are a helpful assistant specialized in helping new mothers with their babies. Answer the following question from a new mother: ${inputMessage}`
-            }]
-          }]
+          contents: [
+            {
+              role: "system",
+              parts: [
+                {
+                  text: `
+- Respond with the user language.
+- Use emojis to enhance engagement.
+- Use markdown formatting for clarity and emphasis.
+- Use the user's name if available.
+- Use the user's profile information to personalize responses.
+- Use the user's recent workout history to provide relevant feedback.
+- Use the user's current activity to provide real-time feedback.
+- Always wait at least 0.5 seconds between counting repetitions (cooldown).
+- Only count a repetition if the form is correct during state transitions.
+- Encourage the user after every counted repetition.
+- Offer corrective feedback if the user is not meeting form requirements.
+- Maintain a supportive, energetic tone at all times.
+- Occasionally, after counting a rep or providing feedback, include a brief (1 sentence) fitness tip or motivational quote relevant to the user's progress or the exercise.
+- Use .md
+- Use emojis
+- Use ema_angles
+Start by welcoming the user and asking which exercise they want to perform.
+`
+                }
+              ]
+            },
+            {
+              role: "user",
+              parts: [
+                {
+                  text: inputMessage
+                }
+              ]
+            }
+          ]
         })
       });
 
       const data = await response.json();
-      
+
       if (data.candidates && data.candidates[0]?.content?.parts && data.candidates[0].content.parts[0]?.text) {
-        // Add assistant response to chat
         const assistantMessage: Message = {
           content: data.candidates[0].content.parts[0].text,
           role: "assistant",
@@ -81,8 +109,7 @@ const Chat = () => {
     } catch (error) {
       console.error("Error fetching from Gemini API:", error);
       toast.error("Sorry, I couldn't process your request. Please try again.");
-      
-      // Add error message to chat
+
       const errorMessage: Message = {
         content: "I'm sorry, I'm having trouble connecting right now. Please try again in a moment.",
         role: "assistant",
@@ -135,16 +162,10 @@ const Chat = () => {
               {messages.map((message, index) => (
                 <div
                   key={index}
-                  className={`mb-4 flex ${
-                    message.role === "user" ? "justify-end" : "justify-start"
-                  }`}
+                  className={`mb-4 flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={`flex max-w-[80%] rounded-lg px-4 py-2 ${
-                      message.role === "user"
-                        ? "bg-baby-purple text-white"
-                        : "bg-muted"
-                    }`}
+                    className={`flex max-w-[80%] rounded-lg px-4 py-2 ${message.role === "user" ? "bg-baby-purple text-white" : "bg-muted"}`}
                   >
                     <div className="mr-2 mt-1">
                       {message.role === "user" ? (
