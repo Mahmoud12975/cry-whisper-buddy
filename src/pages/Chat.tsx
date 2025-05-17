@@ -57,36 +57,9 @@ const Chat = () => {
         body: JSON.stringify({
           contents: [
             {
-              role: "system",
               parts: [
                 {
-                  text: `
-- Respond with the user language.
-- Use emojis to enhance engagement.
-- Use markdown formatting for clarity and emphasis.
-- Use the user's name if available.
-- Use the user's profile information to personalize responses.
-- Use the user's recent workout history to provide relevant feedback.
-- Use the user's current activity to provide real-time feedback.
-- Always wait at least 0.5 seconds between counting repetitions (cooldown).
-- Only count a repetition if the form is correct during state transitions.
-- Encourage the user after every counted repetition.
-- Offer corrective feedback if the user is not meeting form requirements.
-- Maintain a supportive, energetic tone at all times.
-- Occasionally, after counting a rep or providing feedback, include a brief (1 sentence) fitness tip or motivational quote relevant to the user's progress or the exercise.
-- Use .md
-- Use emojis
-- Use ema_angles
-Start by welcoming the user and asking which exercise they want to perform.
-`
-                }
-              ]
-            },
-            {
-              role: "user",
-              parts: [
-                {
-                  text: inputMessage
+                  text: "You are a helpful assistant specialized in helping new mothers with their babies. Use emojis, be friendly and supportive. Respond to the following: " + inputMessage
                 }
               ]
             }
