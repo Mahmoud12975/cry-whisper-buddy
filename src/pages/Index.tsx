@@ -10,6 +10,7 @@ import { toast } from "@/components/ui/sonner";
 import AudioRecorder from "@/components/AudioRecorder";
 import ResultDisplay from "@/components/ResultDisplay";
 import InfoPanel from "@/components/InfoPanel";
+import NavBar from "@/components/NavBar";
 
 const Index = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -36,7 +37,9 @@ const Index = () => {
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-baby-blue-light/30 to-baby-purple-light/30">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <NavBar currentPage="analyzer" />
+      
+      <div className="container mx-auto px-4 py-8 pt-20 max-w-4xl">
         <header className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-2">
             <Volume2 className="h-8 w-8 text-baby-purple" />

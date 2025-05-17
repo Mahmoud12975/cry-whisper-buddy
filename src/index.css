@@ -70,3 +70,28 @@
 .recording-visualizer .bar {
   background-color: theme('colors.baby.pink');
 }
+
+@keyframes wave-1 {
+  0%, 100% { height: 10px; }
+  50% { height: 40px; }
+}
+
+@keyframes wave-2 {
+  0%, 100% { height: 20px; }
+  50% { height: 50px; }
+}
+
+@keyframes wave-3 {
+  0%, 100% { height: 30px; }
+  50% { height: 60px; }
+}
+
+@keyframes wave-4 {
+  0%, 100% { height: 20px; }
+  50% { height: 50px; }
+}
+
+@keyframes wave-5 {
+  0%, 100% { height: 10px; }
+  50% { height: 40px; }
+}
