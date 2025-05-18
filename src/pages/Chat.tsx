@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Bot, Send, User, MessageCircle, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -45,7 +44,7 @@ const Chat = () => {
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
 
-    const userMessage: ChatMessage = {
+    const userMessage = {
       content: inputMessage,
       role: "user",
       timestamp: new Date(),
@@ -66,7 +65,8 @@ const Chat = () => {
             {
               parts: [
                 {
-                  text: "You are a helpful assistant specialized in helping new mothers with their babies. Use emojis, be friendly and supportive. Respond to the following: " + inputMessage
+                  text: `You are a compassionate AI assistant named Mommy Helper, specialized in supporting new mothers with their babies. Please avoid using any special characters or symbols in your responses. If you need to emphasize text, use clear language instead of formatting. Keep your responses clear, friendly, and easy to read.
+Please respond in the same language as: ${inputMessage}`
                 }
               ]
             }
@@ -77,7 +77,7 @@ const Chat = () => {
       const data = await response.json();
 
       if (data.candidates && data.candidates[0]?.content?.parts && data.candidates[0].content.parts[0]?.text) {
-        const assistantMessage: ChatMessage = {
+        const assistantMessage = {
           content: data.candidates[0].content.parts[0].text,
           role: "assistant",
           timestamp: new Date(),
@@ -90,7 +90,7 @@ const Chat = () => {
       console.error("Error fetching from Gemini API:", error);
       toast.error("Sorry, I couldn't process your request. Please try again.");
 
-      const errorMessage: ChatMessage = {
+      const errorMessage = {
         content: "I'm sorry, I'm having trouble connecting right now. Please try again in a moment.",
         role: "assistant",
         timestamp: new Date(),
@@ -101,7 +101,7 @@ const Chat = () => {
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -112,7 +112,7 @@ const Chat = () => {
     createSession();
   };
 
-  const formatTime = (date: Date) => {
+  const formatTime = (date) => {
     return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
@@ -194,9 +194,9 @@ const Chat = () => {
                       <Bot className="h-4 w-4" />
                     </div>
                     <div className="flex space-x-1 items-center">
-                      <div className="h-2 w-2 rounded-full bg-baby-purple animate-bounce" style={{ animationDelay: "0.1s" }} />
-                      <div className="h-2 w-2 rounded-full bg-baby-purple animate-bounce" style={{ animationDelay: "0.2s" }} />
-                      <div className="h-2 w-2 rounded-full bg-baby-purple animate-bounce" style={{ animationDelay: "0.3s" }} />
+<div className="h-2 w-2 rounded-full bg-baby-purple animate-bounce delay-100" />
+                      <div className="h-2 w-2 rounded-full bg-baby-purple animate-bounce delay-200" />
+                      <div className="h-2 w-2 rounded-full bg-baby-purple animate-bounce delay-300" />
                     </div>
                   </div>
                 </div>
